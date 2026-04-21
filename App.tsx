@@ -235,7 +235,7 @@ const App: React.FC = () => {
 
       {/* Tab Navigation - Hidden in Full Screen */}
       {!isFullScreen && (
-        <div className="bg-stone-100 dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 sticky top-[40px] md:top-[44px] z-40 transition-colors duration-300 shadow-sm">
+        <div className="bg-stone-100 dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 sticky top-14 z-40 transition-colors duration-300 shadow-sm">
           <div className="max-w-4xl mx-auto flex">
             {tabs.map((tab) => {
               const Icon = tab.icon;
