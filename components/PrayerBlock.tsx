@@ -59,7 +59,7 @@ const PrayerBlock: React.FC<PrayerBlockProps> = ({ block, settings, onNavigate }
 
   // Define dynamic classes based on variant
   const tibetanColorClass = isInstruction
-    ? 'text-stone-500 dark:text-stone-400 italic'
+    ? 'text-stone-600 dark:text-stone-400 italic'
     : isRepeated
       ? 'text-[#5D4037] dark:text-[#D7CCC8] font-normal' // Dark Brown / Light Brown in dark mode
       : 'text-black dark:text-stone-100 font-normal';
@@ -72,8 +72,8 @@ const PrayerBlock: React.FC<PrayerBlockProps> = ({ block, settings, onNavigate }
       {/* Tibetan Script */}
       {settings.showTibetan && block.tibetan && (
         <div 
-          className={`font-tibetan leading-relaxed mb-2 text-center transition-colors duration-300 whitespace-pre-wrap ${tibetanColorClass}`}
-          style={isInstruction ? instructionTibetanSize : tibetanSize}
+          className={`font-tibetan leading-loose mb-2 text-center transition-colors duration-300 whitespace-pre-wrap ${tibetanColorClass}`}
+          style={{ ...(isInstruction ? instructionTibetanSize : tibetanSize), lineHeight: '2.4' }}
         >
           {block.tibetan}
         </div>
@@ -93,8 +93,8 @@ const PrayerBlock: React.FC<PrayerBlockProps> = ({ block, settings, onNavigate }
       {settings.showTranslation && block.translation && (
         <div 
           className={`font-serif leading-relaxed text-center max-w-2xl mx-auto whitespace-pre-wrap ${
-            isInstruction 
-              ? 'text-stone-500 dark:text-stone-400 italic' 
+            isInstruction
+              ? 'text-stone-600 dark:text-stone-400 italic'
               : 'text-stone-600 dark:text-stone-300'
           }`}
           style={translationSize}
