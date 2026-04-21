@@ -52,7 +52,7 @@ const BottomBar: React.FC<BottomBarProps> = ({
   // Base styles for the glass containers
   const baseControlStyles = "flex items-center p-1 bg-white/80 dark:bg-stone-900/80 backdrop-blur-lg rounded-md border border-stone-200 dark:border-stone-800 shadow-sm transition-all duration-300";
   
-  const btnStyles = "p-2 rounded-md hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-300 transition-colors";
+  const btnStyles = "p-3 rounded-md hover:bg-stone-100 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-300 transition-colors";
   const activeBtnStyles = "bg-monk-red/10 text-monk-red dark:text-monk-saffron";
 
   return (

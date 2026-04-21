@@ -117,7 +117,7 @@ const App: React.FC = () => {
       
       // Calculate speed: Non-linear curve for control
       // (Tilt / 8)^2 makes small tilts slow and big tilts fast
-      const speed = Math.pow(Math.abs(tilt) / 8, 2) * Math.sign(tilt) * (scrollSpeed * 0.5);
+      const speed = Math.pow(Math.abs(tilt) / 8, 2) * -Math.sign(tilt) * (scrollSpeed * 0.5);
       
       tiltRef.current = speed; 
   
