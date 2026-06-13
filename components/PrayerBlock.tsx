@@ -12,6 +12,7 @@ const PrayerBlock: React.FC<PrayerBlockProps> = ({ block, settings, onNavigate }
   const isInstruction = block.type === BlockType.INSTRUCTION;
   const isNavigation = block.type === BlockType.NAVIGATION;
   const isTitle = block.type === BlockType.TITLE;
+  const isImage = block.type === BlockType.IMAGE;
   const isRepeated = block.variant === 'repeated';
 
   // Base font size calculations
@@ -40,6 +41,32 @@ const PrayerBlock: React.FC<PrayerBlockProps> = ({ block, settings, onNavigate }
         )}
         <div className="w-24 h-1 bg-monk-red/20 dark:bg-monk-saffron/20 mx-auto mt-8 rounded-full"></div>
       </div>
+    );
+  }
+
+  if (isImage && block.imageUrl) {
+    return (
+      <figure className="my-8 md:my-10 animate-fadeIn">
+        <div className="mx-auto w-full max-w-[280px] md:max-w-sm p-2 md:p-2.5 bg-white dark:bg-stone-800/80 rounded-xl shadow-lg ring-1 ring-stone-200 dark:ring-stone-700">
+          <img
+            src={block.imageUrl}
+            alt={block.translation}
+            width={block.imageWidth}
+            height={block.imageHeight}
+            loading="lazy"
+            draggable={false}
+            className="w-full h-auto rounded-lg select-none pointer-events-none"
+          />
+        </div>
+        {block.translation && (
+          <figcaption
+            className="mt-3 text-center font-serif italic text-stone-500 dark:text-stone-400"
+            style={{ fontSize: `${settings.fontSize * 0.85}px` }}
+          >
+            {block.translation}
+          </figcaption>
+        )}
+      </figure>
     );
   }
 

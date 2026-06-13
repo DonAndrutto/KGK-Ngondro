@@ -886,6 +886,14 @@ export const TABS_DATA = {
           translation: 'Having clearly visualized these objects of refuge, pray with the intense, heartfelt devotion that comes from contemplating their qualities and compassion:'
         },
         {
+          id: 'ng-3-26-img',
+          type: BlockType.IMAGE,
+          imageUrl: 'https://raw.githubusercontent.com/DonAndrutto/Media/fb4334123099733c182b1a99b404b4b1cbfc5a41/Refuge%20Tree.jpg',
+          imageWidth: 1646,
+          imageHeight: 2197,
+          translation: 'The Refuge Tree'
+        },
+        {
           id: 'ng-3-27',
           type: BlockType.RECITATION,
           tibetan: 'ན་མོ་༔ སྣང་བ་མ་བཀོད་དབྱིངས་ཀྱི་ནང༔',
@@ -1105,6 +1113,14 @@ export const TABS_DATA = {
           type: BlockType.INSTRUCTION,
           tibetan: 'ཞེས་དམིགས་ལ།',
           translation: 'Thus, with the visualization:'
+        },
+        {
+          id: 'ng-5-16-img',
+          type: BlockType.IMAGE,
+          imageUrl: 'https://raw.githubusercontent.com/DonAndrutto/Media/fb4334123099733c182b1a99b404b4b1cbfc5a41/Vajrasattva.jpg',
+          imageWidth: 634,
+          imageHeight: 888,
+          translation: 'Vajrasattva'
         },
         {
           id: 'ng-5-17',
@@ -1475,6 +1491,14 @@ export const TABS_DATA = {
           tibetan: 'བརྩེ་བས་དགོངས་བཞིན་དགྱེས་པས་བཞུགས་པར་གྱུར།།',
           phonetics: 'tse wai gong shin gye pai shuk par gyur',
           translation: 'dwells joyfully thinking of me with loving kindness.'
+        },
+        {
+          id: 'ng-7-15-img',
+          type: BlockType.IMAGE,
+          imageUrl: 'https://raw.githubusercontent.com/DonAndrutto/Media/fb4334123099733c182b1a99b404b4b1cbfc5a41/Guru%20Yoga.jpg',
+          imageWidth: 634,
+          imageHeight: 886,
+          translation: 'Guru Yoga'
         },
         {
           id: 'ng-7-16',
