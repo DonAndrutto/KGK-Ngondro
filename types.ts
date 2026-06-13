@@ -3,7 +3,8 @@ export enum BlockType {
   RECITATION = 'RECITATION',
   HEADER = 'HEADER',
   NAVIGATION = 'NAVIGATION',
-  TITLE = 'TITLE'
+  TITLE = 'TITLE',
+  IMAGE = 'IMAGE'
 }
 
 export interface PrayerBlock {
@@ -14,6 +15,9 @@ export interface PrayerBlock {
   translation: string;
   targetTab?: 'YOGA' | 'NGONDRO';
   variant?: 'default' | 'repeated';
+  imageUrl?: string;
+  imageWidth?: number;
+  imageHeight?: number;
 }
 
 export interface PrayerSection {

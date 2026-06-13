@@ -1,13 +1,43 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { TABS_DATA } from './constants';
-import { AppSettings } from './types';
+import { AppSettings, PrayerBlock as PrayerBlockData } from './types';
 import BottomBar from './components/BottomBar';
 import Header from './components/Header';
 import PrayerBlock from './components/PrayerBlock';
+import RepeatGroup from './components/RepeatGroup';
 import { Sparkles, Scroll, ArrowUp } from 'lucide-react';
 
 type TabKey = 'YOGA' | 'NGONDRO';
+
+// How the auto-scroll behaves around repeated formulas
+const REPEAT_PAUSE_MS = 4000;      // how long to rest on a repetition
+const RESUME_RAMP_MS = 1500;       // ease back up to speed afterwards
+const SLOWDOWN_ZONE_PX = 160;      // start decelerating this far before it
+const PAUSE_LINE_RATIO = 0.38;     // viewport line at which a repetition "arrives"
+
+type RenderItem =
+  | { kind: 'block'; block: PrayerBlockData }
+  | { kind: 'repeat'; id: string; blocks: PrayerBlockData[] };
+
+// Chunk consecutive 'repeated' blocks into groups so they can share one frame
+const groupBlocks = (blocks: PrayerBlockData[]): RenderItem[] => {
+  const items: RenderItem[] = [];
+  let current: PrayerBlockData[] | null = null;
+  for (const block of blocks) {
+    if (block.variant === 'repeated') {
+      if (!current) {
+        current = [];
+        items.push({ kind: 'repeat', id: `repeat-${block.id}`, blocks: current });
+      }
+      current.push(block);
+    } else {
+      current = null;
+      items.push({ kind: 'block', block });
+    }
+  }
+  return items;
+};
 
 const App: React.FC = () => {
   // --- State ---
@@ -37,6 +67,15 @@ const App: React.FC = () => {
   const scrollIntervalRef = useRef<number | null>(null);
   const previousScrollY = useRef(0);
   const stuckFrames = useRef(0);
+
+  // --- Repetition pause state ---
+  const [pausedGroupId, setPausedGroupId] = useState<string | null>(null);
+  const triggeredGroupsRef = useRef<Set<string>>(new Set());
+  const pauseUntilRef = useRef(0);
+  const activePauseRef = useRef<string | null>(null);
+  // Sub-pixel movement carry: browsers round fractional scrollBy calls, so
+  // slow speeds would otherwise stall entirely
+  const scrollCarryRef = useRef(0);
   
   // --- Effects ---
   
@@ -66,15 +105,79 @@ const App: React.FC = () => {
     if (isAutoScrolling) {
       previousScrollY.current = window.scrollY;
       stuckFrames.current = 0;
+      pauseUntilRef.current = 0;
+      scrollCarryRef.current = 0;
+
+      // Repetitions already above the pause line shouldn't trigger a pause
+      const seedLine = window.innerHeight * PAUSE_LINE_RATIO;
+      triggeredGroupsRef.current = new Set();
+      document.querySelectorAll<HTMLElement>('[data-repeat-id]').forEach((el) => {
+        if (el.getBoundingClientRect().top <= seedLine) {
+          triggeredGroupsRef.current.add(el.dataset.repeatId!);
+        }
+      });
 
       scrollIntervalRef.current = window.setInterval(() => {
+        const now = Date.now();
         const currentScrollY = window.scrollY;
         const docHeight = document.documentElement.scrollHeight;
         const winHeight = window.innerHeight;
+        const pauseLine = winHeight * PAUSE_LINE_RATIO;
 
-        // Stuck Detection
-        if (Math.abs(currentScrollY - previousScrollY.current) < 0.1) {
-          stuckFrames.current += 1;
+        // Hold position while resting on a repeated formula
+        if (now < pauseUntilRef.current) {
+          previousScrollY.current = currentScrollY;
+          stuckFrames.current = 0;
+          return;
+        }
+        if (activePauseRef.current) {
+          activePauseRef.current = null;
+          setPausedGroupId(null);
+        }
+
+        // Look for repeated formulas: one arriving at the pause line, or the
+        // distance to the next one coming up
+        let approachDistance = Infinity;
+        let arrivedId: string | null = null;
+        document.querySelectorAll<HTMLElement>('[data-repeat-id]').forEach((el) => {
+          const id = el.dataset.repeatId!;
+          if (triggeredGroupsRef.current.has(id)) return;
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= pauseLine) {
+            triggeredGroupsRef.current.add(id);
+            if (rect.bottom > pauseLine) arrivedId = id;
+          } else {
+            approachDistance = Math.min(approachDistance, rect.top - pauseLine);
+          }
+        });
+
+        if (arrivedId) {
+          pauseUntilRef.current = now + REPEAT_PAUSE_MS;
+          activePauseRef.current = arrivedId;
+          setPausedGroupId(arrivedId);
+          return;
+        }
+
+        // Ease out when approaching a repetition, ease back in after the rest
+        let speedFactor = 1;
+        if (pauseUntilRef.current !== 0) {
+          const sinceResume = now - pauseUntilRef.current;
+          if (sinceResume < RESUME_RAMP_MS) {
+            speedFactor = Math.max(0.1, sinceResume / RESUME_RAMP_MS);
+          }
+        }
+        if (approachDistance < SLOWDOWN_ZONE_PX) {
+          speedFactor = Math.min(speedFactor, Math.max(0.2, approachDistance / SLOWDOWN_ZONE_PX));
+        }
+
+        // Stuck Detection (skipped while deliberately moving slowly)
+        if (speedFactor === 1) {
+          if (Math.abs(currentScrollY - previousScrollY.current) < 0.1) {
+            stuckFrames.current += 1;
+          } else {
+            stuckFrames.current = 0;
+            previousScrollY.current = currentScrollY;
+          }
         } else {
           stuckFrames.current = 0;
           previousScrollY.current = currentScrollY;
@@ -87,13 +190,19 @@ const App: React.FC = () => {
           return;
         }
 
-        // Move Logic
-        const moveAmount = Math.max(0.4, scrollSpeed * 0.3);
-        window.scrollBy({ top: moveAmount, behavior: 'auto' });
+        // Move Logic (accumulate fractions, scroll by whole pixels)
+        scrollCarryRef.current += Math.max(0.4, scrollSpeed * 0.3) * speedFactor;
+        const step = Math.floor(scrollCarryRef.current);
+        if (step >= 1) {
+          scrollCarryRef.current -= step;
+          window.scrollBy({ top: step, behavior: 'auto' });
+        }
 
       }, 16); // ~60fps
     } else {
       stopScrolling();
+      activePauseRef.current = null;
+      setPausedGroupId(null);
     }
 
     return stopScrolling;
@@ -299,14 +408,31 @@ const App: React.FC = () => {
 
               {/* Prayer Blocks */}
               <div className="space-y-6 px-1 md:px-8">
-                {section.blocks.map((block) => (
-                  <PrayerBlock 
-                    key={block.id} 
-                    block={block} 
-                    settings={settings} 
-                    onNavigate={handleNavigation}
-                  />
-                ))}
+                {groupBlocks(section.blocks).map((item) =>
+                  item.kind === 'repeat' ? (
+                    <RepeatGroup
+                      key={item.id}
+                      groupId={item.id}
+                      isPausedHere={pausedGroupId === item.id}
+                    >
+                      {item.blocks.map((block) => (
+                        <PrayerBlock
+                          key={block.id}
+                          block={block}
+                          settings={settings}
+                          onNavigate={handleNavigation}
+                        />
+                      ))}
+                    </RepeatGroup>
+                  ) : (
+                    <PrayerBlock
+                      key={item.block.id}
+                      block={item.block}
+                      settings={settings}
+                      onNavigate={handleNavigation}
+                    />
+                  )
+                )}
               </div>
 
               {/* Decorative Section End */}
