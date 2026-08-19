@@ -1,9 +1,10 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { TABS_DATA } from './constants';
 import { AppSettings, PrayerBlock as PrayerBlockData } from './types';
 import BottomBar from './components/BottomBar';
 import Header from './components/Header';
+import Introduction from './components/Introduction';
 import PrayerBlock from './components/PrayerBlock';
 import RepeatGroup from './components/RepeatGroup';
 import { Sparkles, Scroll, ArrowUp } from 'lucide-react';
@@ -57,6 +58,7 @@ const App: React.FC = () => {
   const [scrollSpeed, setScrollSpeed] = useState(1);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isIntroOpen, setIsIntroOpen] = useState(false);
 
   // --- Tilt Scroll State ---
   const [isTiltScrolling, setIsTiltScrolling] = useState(false);
@@ -291,6 +293,15 @@ const App: React.FC = () => {
     setSettings(prev => ({ ...prev, [key]: value }));
   };
 
+  // Opening the introduction stops the liturgy moving underneath the overlay
+  const openIntroduction = useCallback(() => {
+    setIsAutoScrolling(false);
+    setIsTiltScrolling(false);
+    setIsIntroOpen(true);
+  }, []);
+
+  const closeIntroduction = useCallback(() => setIsIntroOpen(false), []);
+
   const handleNavigation = (targetTab: string) => {
     setActiveTab(targetTab as TabKey);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -339,12 +350,13 @@ const App: React.FC = () => {
         <Header 
           settings={settings}
           updateSetting={updateSetting}
+          onOpenIntroduction={openIntroduction}
         />
       )}
 
       {/* Tab Navigation - Hidden in Full Screen */}
       {!isFullScreen && (
-        <div className="bg-stone-100 dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 sticky top-14 z-40 transition-colors duration-300 shadow-sm">
+        <div className="bg-stone-100 dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 sticky top-20 md:top-16 z-40 transition-colors duration-300 shadow-sm">
           <div className="max-w-4xl mx-auto flex">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -470,6 +482,9 @@ const App: React.FC = () => {
         isTiltScrolling={isTiltScrolling}
         toggleTiltScroll={toggleTiltScroll}
       />
+
+      {/* Introduction Pop-up */}
+      <Introduction isOpen={isIntroOpen} onClose={closeIntroduction} />
 
       {/* Scroll to Top Button */}
       {showScrollTop && (

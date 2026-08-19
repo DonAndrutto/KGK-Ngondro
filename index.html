@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tibetan Prayer Assistant</title>
+    <title>Künzang Gongdü Ngöndro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -51,6 +51,28 @@
       }
       .dark ::-webkit-scrollbar-thumb:hover {
         background: #64748b;
+      }
+
+      /* Introduction pop-up */
+      @keyframes introFade {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @keyframes introPanel {
+        from { opacity: 0; transform: translateY(12px) scale(0.985); }
+        to { opacity: 1; transform: none; }
+      }
+      .animate-introFade {
+        animation: introFade 0.2s ease-out both;
+      }
+      .animate-introPanel {
+        animation: introPanel 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .animate-introFade,
+        .animate-introPanel {
+          animation: none;
+        }
       }
     </style>
   <script type="importmap">
